@@ -1,16 +1,19 @@
 import argparse
+import joblib
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import make_pipeline
 
-from config import RESULTS_DIR, SEED
+from config import MODELS_DIR, RESULTS_DIR, SEED
 from data import load_splits
 from features import last_step_features, summary_features, stat_param_names
 from metrics import report
 
+DEFAULT_N_ESTIMATORS = 300
+
 parser = argparse.ArgumentParser()
-parser.add_argument("--n_estimators", type=int, default=300)
+parser.add_argument("--n_estimators", type=int, default=DEFAULT_N_ESTIMATORS)
 parser.add_argument("--seed", type=int, default=SEED)
 args = parser.parse_args()
 N_ESTIMATORS = args.n_estimators
@@ -37,6 +40,11 @@ def run(name, make_features):
         ),
     )
     model.fit(make_features(X_train), y_train)
+
+    # Save the default model (300 trees, seed 42) to use for inference
+    if N_ESTIMATORS == DEFAULT_N_ESTIMATORS and RANDOM_SEED == SEED:
+        joblib.dump(model, MODELS_DIR / f"{name}.joblib")
+        print(f"Model saved in {MODELS_DIR / f'{name}.joblib'}")
 
     prob_val = model.predict_proba(make_features(X_val))[:, 1]
     prob_test = model.predict_proba(make_features(X_test))[:, 1]
