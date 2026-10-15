@@ -56,7 +56,7 @@ def plot_confusion_matrix(name, results, folder=""):
         display.plot(ax=ax, cmap="PuRd", values_format=",", colorbar=False)
         ax.xaxis.tick_top()
         ax.xaxis.set_label_position("top")
-        ax.set_title(f"{title}, TSS = {r['TSS']:.3f}", pad=12)
+        ax.set_title(f"{title}", pad=12)
     fig.suptitle(f"Confusion matrix: {name}", fontweight="bold")
     fig.tight_layout()
     fig.savefig(CONFUSION_DIR / folder / f"confusion_matrix_{name}.png", dpi=200)
@@ -74,6 +74,7 @@ def report(name, y_val, prob_val, y_test, prob_test, tune_threshold=True, folder
     }
     (RESULTS_DIR / folder).mkdir(parents=True, exist_ok=True)
     (RESULTS_DIR / folder / f"{name}.json").write_text(json.dumps(results, indent=2))
+    print(f"Results saved in {RESULTS_DIR / folder / f'{name}.json'}")
     plot_confusion_matrix(name, results, folder)
-    print(f"Results saved in {RESULTS_DIR / folder / f'{name}.json'} and {CONFUSION_DIR / folder / f'confusion_matrix_{name}.png'}")
+    print(f"Confusion matrix saved in {CONFUSION_DIR / folder / f'confusion_matrix_{name}.png'}")
     return results

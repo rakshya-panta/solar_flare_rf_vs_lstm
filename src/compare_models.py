@@ -14,8 +14,8 @@ for folder in sorted(RESULTS_DIR.glob("n_estimators_*"), key=lambda folder: int(
     for name in ["rf_last", "rf_summary"]:
         paths[f"{name} (n={n})"] = folder / f"{name}.json"
 
-for name in ["lstm_last", "lstm_shuffled", "lstm_ordered"]:
-    paths[name] = RESULTS_DIR / f"{name}.json"
+# for name in ["lstm_last", "lstm_shuffled", "lstm_ordered"]:
+#     paths[name] = RESULTS_DIR / f"{name}.json"
 
 # One row per model in each table
 val_rows, test_rows = {}, {}

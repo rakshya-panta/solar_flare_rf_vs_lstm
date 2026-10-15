@@ -11,8 +11,13 @@ from metrics import report
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--n_estimators", type=int, default=300)
-N_ESTIMATORS = parser.parse_args().n_estimators
+parser.add_argument("--seed", type=int, default=SEED)
+args = parser.parse_args()
+N_ESTIMATORS = args.n_estimators
+RANDOM_SEED = args.seed
 FOLDER = f"n_estimators_{N_ESTIMATORS}"
+if RANDOM_SEED != SEED:  # try other seeds to check stability
+    FOLDER = f"extra_seeds/n_estimators_{N_ESTIMATORS}/seed_{RANDOM_SEED}"
 
 (X_train, y_train), (X_val, y_val), (X_test, y_test) = load_splits()
 
@@ -28,7 +33,7 @@ def run(name, make_features):
             # no-M/X weight = 204,559 / (2 × 200,480) ≈ 0.51
             class_weight="balanced",
             n_jobs=-1,
-            random_state=SEED,
+            random_state=RANDOM_SEED,
         ),
     )
     model.fit(make_features(X_train), y_train)
