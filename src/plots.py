@@ -182,9 +182,9 @@ def plot_parameter_ranges():
     values = np.concatenate(samples)
     ranges = pd.DataFrame({
         "min": np.min(mins, axis=0),
-        "p1": np.nanpercentile(values, 1, axis=0),
+        "p1": np.nanpercentile(values, 1, axis=0), # 1% of the values are below this value, low end
         "median": np.nanpercentile(values, 50, axis=0),
-        "p99": np.nanpercentile(values, 99, axis=0),
+        "p99": np.nanpercentile(values, 99, axis=0), # 99% of the values are below this value, high end
         "max": np.max(maxs, axis=0),
     }, index=PARAMS).sort_values("median")
     ranges.to_csv(RESULTS_DIR / "parameter_ranges.csv", index_label="parameter")

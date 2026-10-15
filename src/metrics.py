@@ -44,9 +44,9 @@ def best_threshold(y_true, prob):
     return float(thresholds[np.argmax(scores)])
 
 
-def plot_confusion_matrix(name, results):
-    """Validation and test confusion matrices of one model, saved to plots/confusion_matrices/<name>.png"""
-    CONFUSION_DIR.mkdir(parents=True, exist_ok=True)
+def plot_confusion_matrix(name, results, folder=""):
+    """Validation and test confusion matrices of one model"""
+    (CONFUSION_DIR / folder).mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.5))
     for ax, split, title in zip(axes, ["val", "test"], ["Validation (P4)", "Test (P5)"]):
         r = results[split]
@@ -59,11 +59,11 @@ def plot_confusion_matrix(name, results):
         ax.set_title(f"{title}, TSS = {r['TSS']:.3f}", pad=12)
     fig.suptitle(f"Confusion matrix: {name}", fontweight="bold")
     fig.tight_layout()
-    fig.savefig(CONFUSION_DIR / f"confusion_matrix_{name}.png", dpi=200)
+    fig.savefig(CONFUSION_DIR / folder / f"confusion_matrix_{name}.png", dpi=200)
     plt.close(fig)
 
 
-def report(name, y_val, prob_val, y_test, prob_test, tune_threshold=True):
+def report(name, y_val, prob_val, y_test, prob_test, tune_threshold=True, folder=""):
     """tune_threshold=False for models that do not use a threshold (i.e., the baseline)."""
     threshold = best_threshold(y_val, prob_val) if tune_threshold else None
     cutoff = threshold if tune_threshold else 0.5
@@ -72,7 +72,8 @@ def report(name, y_val, prob_val, y_test, prob_test, tune_threshold=True):
         "val": evaluate(y_val, prob_val, cutoff),
         "test": evaluate(y_test, prob_test, cutoff),
     }
-    (RESULTS_DIR / f"{name}.json").write_text(json.dumps(results, indent=2))
-    plot_confusion_matrix(name, results)
-    print(f"Results saved in {RESULTS_DIR / f'{name}.json'} and {CONFUSION_DIR / f'confusion_matrix_{name}.png'}")
+    (RESULTS_DIR / folder).mkdir(parents=True, exist_ok=True)
+    (RESULTS_DIR / folder / f"{name}.json").write_text(json.dumps(results, indent=2))
+    plot_confusion_matrix(name, results, folder)
+    print(f"Results saved in {RESULTS_DIR / folder / f'{name}.json'} and {CONFUSION_DIR / folder / f'confusion_matrix_{name}.png'}")
     return results
