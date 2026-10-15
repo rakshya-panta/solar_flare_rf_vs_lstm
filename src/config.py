@@ -24,3 +24,4 @@ TEST = ["partition5"]
 ALL_PARTITIONS = TRAIN + VAL + TEST
 
 SEED = 42
+DEFAULT_N_ESTIMATORS = 300  # number of trees chosen after the n_estimators experiments
