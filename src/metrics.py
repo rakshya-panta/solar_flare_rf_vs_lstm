@@ -38,9 +38,9 @@ def evaluate(y_true, prob, threshold=0.5):
 
 
 def best_threshold(y_true, prob):
-    """Pick the decision threshold with the highest TSS using validation data only."""
-    thresholds = np.round(np.arange(0.05, 1.0, 0.05), 2)
-    scores = [evaluate(y_true, prob, t)["TSS"] for t in thresholds]
+    """Pick the decision threshold with the highest CSS using validation data only."""
+    thresholds = np.round(np.arange(0.01, 1.0, 0.01), 2) # thresholds from 0.01 to 0.99 in increments of 0.01
+    scores = [evaluate(y_true, prob, t)["CSS"] for t in thresholds]
     return float(thresholds[np.argmax(scores)])
 
 
@@ -75,3 +75,4 @@ def report(name, y_val, prob_val, y_test, prob_test, tune_threshold=True):
     (RESULTS_DIR / f"{name}.json").write_text(json.dumps(results, indent=2))
     plot_confusion_matrix(name, results)
     print(f"Results saved in {RESULTS_DIR / f'{name}.json'} and {CONFUSION_DIR / f'confusion_matrix_{name}.png'}")
+    return results
