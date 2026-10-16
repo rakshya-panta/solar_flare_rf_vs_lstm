@@ -29,10 +29,10 @@ def mark_partitions(ax):
     for name in ALL_PARTITIONS:
         times = info.loc[info.partition == name, "end_time"]
         if name != ALL_PARTITIONS[0]:
-            ax.axvline(times.min(), color=BLUE, linewidth=1)
+            ax.axvline(times.min(), color=ORANGE, linewidth=1)
         middle = times.min() + (times.max() - times.min()) / 2
         ax.text(middle, 1.02, partition_label(name), transform=ax.get_xaxis_transform(),
-                ha="center", va="bottom", color=BLUE, fontsize=9)
+                ha="center", va="bottom", color=ORANGE, fontsize=9)
 
 
 ####### Load data 

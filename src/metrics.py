@@ -53,11 +53,14 @@ def plot_confusion_matrix(name, results, folder=""):
         matrix = np.array([[r["TP"], r["FN"]],
                            [r["FP"], r["TN"]]])
         display = ConfusionMatrixDisplay(matrix, display_labels=["M/X", "No M/X"])
-        display.plot(ax=ax, cmap="PuRd", values_format=",", colorbar=False)
+        display.plot(ax=ax, cmap="PuRd", values_format=",", colorbar=False, text_kw={"fontsize": 20})  # big numbers
         ax.xaxis.tick_top()
         ax.xaxis.set_label_position("top")
-        ax.set_title(f"{title}", pad=12)
-    fig.suptitle(f"Confusion matrix: {name}", fontweight="bold")
+        ax.set_xlabel("Predicted label", fontsize=14)
+        ax.set_ylabel("True label", fontsize=14)
+        ax.tick_params(labelsize=13)
+        ax.set_title(f"{title}", pad=12, fontsize=15)
+    fig.suptitle(f"Confusion matrix: {name}", fontweight="bold", fontsize=16)
     fig.tight_layout()
     fig.savefig(CONFUSION_DIR / folder / f"confusion_matrix_{name}.png", dpi=200)
     plt.close(fig)
