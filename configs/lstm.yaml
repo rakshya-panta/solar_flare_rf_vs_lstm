@@ -1,0 +1,25 @@
+# LSTM settings used for training
+params:
+  pos_weight: full_weight
+  hidden_size: 64
+  num_layers: 1
+  dropout: 0.0
+  weight_decay: 0.0
+  batch_size: 256
+  learning_rate: 0.001
+  max_epochs: 30
+  patience: 10 # early stopping
+wandb_project: data-mining-project-sf
+
+# Bayesian hyperparameter tuning
+sweep:
+  method: bayes
+  metric: {name: best_val_CSS, goal: maximize}
+  parameters:
+    pos_weight: {distribution: log_uniform_values, min: 1, max: full_weight}
+    hidden_size: {values: [32, 64, 128]}
+    num_layers: {values: [1, 2, 3]}
+    dropout: {distribution: uniform, min: 0.0, max: 0.5}
+    weight_decay: {distribution: log_uniform_values, min: 1.0e-6, max: 1.0e-2}
+    batch_size: {values: [128, 256, 512]}
+    learning_rate: {distribution: log_uniform_values, min: 1.0e-4, max: 1.0e-2}
