@@ -17,3 +17,8 @@ def load_splits():
 def load_labels(partitions):
     """Only the labels y, without loading the measurements X."""
     return np.concatenate([np.load(DATA_DIR / f"{name}.npz")["y"] for name in partitions])
+
+
+def calc_pos_weight(y):
+    """M/X weight that balances the two classes: num of non-M/X instances / num of M/X instances."""
+    return float((y == 0).sum() / (y == 1).sum())

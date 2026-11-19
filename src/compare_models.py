@@ -72,10 +72,10 @@ fig.savefig(ROOT / "plots" / "rf_n_estimators.png", dpi=200)
 print(f"Plot saved in {ROOT / 'plots' / 'rf_n_estimators.png'}")
 
 # Plot feature importance (%) of rf_summary for the default number of trees
-importance = pd.read_csv(RESULTS_DIR / f"n_estimators_{DEFAULT_N_ESTIMATORS}" / "rf_importance.csv", index_col=0)["importance"] * 100
+rf_summary_importance = pd.read_csv(RESULTS_DIR / f"n_estimators_{DEFAULT_N_ESTIMATORS}" / "rf_summary_importance.csv", index_col=0)["importance"] * 100
 stat_names = {"max": "Maximum", "mean": "Mean", "min": "Minimum", "std": "Std. dev.", "slope": "Slope"}
-by_stat = importance.groupby(importance.index.str.split("_").str[0]).sum().rename(index=stat_names)  # "max_TOTUSJH" -> "max"
-by_param = importance.groupby(importance.index.str.split("_", n=1).str[1]).sum()  # "max_TOTUSJH" -> "TOTUSJH"
+by_stat = rf_summary_importance.groupby(rf_summary_importance.index.str.split("_").str[0]).sum().rename(index=stat_names)  # "max_TOTUSJH" -> "max"
+by_param = rf_summary_importance.groupby(rf_summary_importance.index.str.split("_", n=1).str[1]).sum()  # "max_TOTUSJH" -> "TOTUSJH"
 
 fig, axes = plt.subplots(2, 1, figsize=(7, 7))
 for ax, values, xlabel in [(axes[0], by_stat.sort_values(), "Aggregate feature importance (%)"),
@@ -85,5 +85,5 @@ for ax, values, xlabel in [(axes[0], by_stat.sort_values(), "Aggregate feature i
     ax.set_xlim(0, values.max() * 1.2)
     ax.set_xlabel(xlabel)
 fig.tight_layout()
-fig.savefig(ROOT / "plots" / "rf_importance.png", dpi=200)
-print(f"Plot saved in {ROOT / 'plots' / 'rf_importance.png'}")
+fig.savefig(ROOT / "plots" / "rf_summary_importance.png", dpi=200)
+print(f"Plot saved in {ROOT / 'plots' / 'rf_summary_importance.png'}")

@@ -1,10 +1,12 @@
 from pathlib import Path
+import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 RAW_DIR = ROOT / "data" / "raw"
 DATA_DIR = ROOT / "data" / "processed"
 RESULTS_DIR = ROOT / "results"
 MODELS_DIR = ROOT / "models"
+CONFIGS_DIR = ROOT / "configs"
 
 for folder in (RAW_DIR, DATA_DIR, RESULTS_DIR, MODELS_DIR):
     folder.mkdir(parents=True, exist_ok=True)
@@ -24,4 +26,11 @@ TEST = ["partition5"]
 ALL_PARTITIONS = TRAIN + VAL + TEST
 
 SEED = 42
-DEFAULT_N_ESTIMATORS = 300  # number of trees chosen after the n_estimators experiments
+
+
+def load_model_config(name):
+    """Model settings and W&B sweep search space from configs/<name>.yaml"""
+    return yaml.safe_load((CONFIGS_DIR / f"{name}.yaml").read_text())
+
+DEFAULT_N_ESTIMATORS = load_model_config("random_forest")["params"]["n_estimators"]
+

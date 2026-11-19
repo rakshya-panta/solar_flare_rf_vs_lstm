@@ -2,6 +2,7 @@ import json
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
     # average_precision_score,
@@ -81,3 +82,15 @@ def report(name, y_val, prob_val, y_test, prob_test, tune_threshold=True, folder
     plot_confusion_matrix(name, results, folder)
     print(f"Confusion matrix saved in {CONFUSION_DIR / folder / f'confusion_matrix_{name}.png'}")
     return results
+
+
+def save_hyp_tuning_results(name, trials, score):
+    """All trials of a W&B sweep and the best settings."""
+    folder = RESULTS_DIR / "hyperparameter_tuning"
+    folder.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(trials).sort_values(score, ascending=False).to_csv(folder / f"{name}_trials.csv", index=False)
+    best_trial = max(trials, key=lambda trial: trial[score])
+    best = {k: v for k, v in best_trial.items() if k not in (score, "threshold")}
+    (folder / f"{name}_best_params.json").write_text(json.dumps(best, indent=2))
+    print(f"Best validation CSS {best_trial[score]:.4f} with {best}")
+    print(f"Saved in {folder}")
