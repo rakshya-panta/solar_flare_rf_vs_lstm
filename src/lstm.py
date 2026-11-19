@@ -68,13 +68,18 @@ def shuffle_time(X):
     return X
 
 
-def predict(model, X):
+def predict_logits(model, X):
+    """Model outputs before the sigmoid"""
     model.eval()
-    probs = []
+    logits = []
     with torch.no_grad():
         for (xb,) in DataLoader(TensorDataset(torch.from_numpy(X)), batch_size=1024):
-            probs.append(torch.sigmoid(model(xb.to(device))).cpu().numpy())
-    return np.concatenate(probs)
+            logits.append(model(xb.to(device)))
+    return torch.cat(logits)
+
+
+def predict(model, X):
+    return torch.sigmoid(predict_logits(model, X)).cpu().numpy()
 
 
 def fit(X_train, y_train, X_val, y_val, params, on_epoch=None):
@@ -102,10 +107,19 @@ def fit(X_train, y_train, X_val, y_val, params, on_epoch=None):
             losses.append(loss.item())
 
         # Validation CSS at its best threshold, so different M/X weights are compared fairly
-        prob_val = predict(model, X_val)
-        val_css = evaluate(y_val, prob_val, best_threshold(y_val, prob_val))["CSS"]
+        val_logits = predict_logits(model, X_val)
+        prob_val = torch.sigmoid(val_logits).cpu().numpy()
+        threshold = best_threshold(y_val, prob_val)
+        val_scores = evaluate(y_val, prob_val, threshold)
+        train_scores = evaluate(y_train, predict(model, X_train), threshold)  # same threshold as validation
+        val_loss = loss_fn(val_logits, torch.from_numpy(y_val).float().to(device)).item()
+        val_css = val_scores["CSS"]
         if on_epoch:
-            on_epoch(epoch, np.mean(losses), val_css)
+            on_epoch(epoch, {
+                "train_loss": np.mean(losses), "val_loss": val_loss,
+                "train_CSS": train_scores["CSS"], "train_TSS": train_scores["TSS"], "train_HSS": train_scores["HSS"],
+                "val_CSS": val_scores["CSS"], "val_TSS": val_scores["TSS"], "val_HSS": val_scores["HSS"],
+            })
 
         if val_css > best_css:
             best_css, best_state, epochs_without_gain = val_css, copy.deepcopy(model.state_dict()), 0
@@ -125,9 +139,9 @@ def train(name, X_train, y_train, X_val, y_val, X_test, y_test):
         "seed": SEED,
     })
 
-    def log(epoch, train_loss, val_css):
-        print(f"{name} epoch {epoch}: loss={train_loss:.4f}  val CSS={val_css:.3f}")
-        wandb.log({"epoch": epoch, "train_loss": train_loss, "val_CSS": val_css})
+    def log(epoch, metrics):
+        print(f"{name} epoch {epoch}: loss={metrics['train_loss']:.4f}  val loss={metrics['val_loss']:.4f}  val CSS={metrics['val_CSS']:.3f}")
+        wandb.log({"epoch": epoch, **metrics})
 
     model, _ = fit(X_train, y_train, X_val, y_val, PARAMS, on_epoch=log)
     torch.save(model.state_dict(), MODELS_DIR / f"{name}.pt")
@@ -150,9 +164,9 @@ def hyperparameter_tuning(X_train, y_train, X_val, y_val, trials):
         with wandb.init(group="lstm_tuning") as run:
             params = {**PARAMS, **dict(run.config)}  # settings not in the search space come from the config
 
-            def log(epoch, train_loss, val_css):
-                print(f"trial {len(results) + 1} epoch {epoch}: val CSS={val_css:.3f}")
-                run.log({"epoch": epoch, "train_loss": train_loss, "val_CSS": val_css})
+            def log(epoch, metrics):
+                print(f"trial {len(results) + 1} epoch {epoch}: val CSS={metrics['val_CSS']:.3f}")
+                run.log({"epoch": epoch, **metrics})
 
             _, best_css = fit(X_train, y_train, X_val, y_val, params, on_epoch=log)
             run.log({"best_val_CSS": best_css})
