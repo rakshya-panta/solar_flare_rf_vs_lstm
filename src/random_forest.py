@@ -72,6 +72,7 @@ def hyperparameter_tuning(name, make_features, trials):
     def run_trial():
         with wandb.init(group=f"{name}_tuning") as run:
             params = {**dict(run.config), "min_samples_leaf": int(run.config.min_samples_leaf)}
+            run.name = f"trees={params['n_estimators']} leaf={params['min_samples_leaf']} depth={params['max_depth']} weight={params['pos_weight']:.1f}"
             model = make_model(params, SEED).fit(train_x, y_train)
             prob_val = model.predict_proba(val_x)[:, 1]
             threshold = best_threshold(y_val, prob_val)

@@ -163,6 +163,8 @@ def hyperparameter_tuning(X_train, y_train, X_val, y_val, trials):
     def run_trial():
         with wandb.init(group="lstm_tuning") as run:
             params = {**PARAMS, **dict(run.config)}  # settings not in the search space come from the config
+            run.name = (f"hidden={params['hidden_size']} layers={params['num_layers']} dropout={params['dropout']:.2f} "
+                        f"lr={params['learning_rate']:.1e} wd={params['weight_decay']:.1e} batch={params['batch_size']} weight={params['pos_weight']:.1f}")
 
             def log(epoch, metrics):
                 print(f"trial {len(results) + 1} epoch {epoch}: val CSS={metrics['val_CSS']:.3f}")
